@@ -1,8 +1,7 @@
-﻿using BasicWebServer.Server;
-using System;
-
-namespace BasicWebServer.Demo 
+﻿namespace BasicWebServer.Demo 
 {
+    using BasicWebServer.Server;
+    using System;
     internal class StartUp
     {
         static void Main(string[] args)
