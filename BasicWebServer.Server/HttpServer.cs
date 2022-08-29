@@ -1,5 +1,7 @@
 ﻿namespace BasicWebServer.Server
 {
+    using BasicWebServer.Server.Http;
+    using BasicWebServer.Server.Routing;
     using System.Net;
     using System.Net.Sockets;
     using System.Text;
@@ -9,13 +11,28 @@
         private readonly int port;
         private readonly TcpListener listener;
 
-        public HttpServer(string ipAddress, int port)
+        private readonly RoutingTable routingTable;
+
+
+        public HttpServer(string ipAddress, int port, Action<IRoutingTable> routingTableConfiguraion)
         {
             this.ipAddress = IPAddress.Parse(ipAddress);
             this.port = port;
-            this.listener = new TcpListener(this.ipAddress,port);
-        }
 
+            this.listener = new TcpListener(this.ipAddress,port);
+
+            routingTableConfiguraion(this.routingTable = new RoutingTable());
+        }
+        public HttpServer(int port, Action<IRoutingTable> routingTable)
+            :this("127.0.0.1",port,routingTable)
+        {
+
+        }
+        public HttpServer(Action<IRoutingTable> routingTable)
+            :this(9090,routingTable)
+        {
+
+        }
         public void Start()
         {
             this.listener.Start();
@@ -33,23 +50,19 @@
 
                 Console.WriteLine(requestText);
 
-                Writeresponse(networkStream, "Hello from the server!");
+                var request = Request.Parse(requestText);
+
+                var response = this.routingTable.MatchRequest(request);
+
+                Writeresponse(networkStream, response);
 
                 connection.Close();
             }
         }
 
-        private void Writeresponse(NetworkStream stream, string content)
+        private void Writeresponse(NetworkStream stream, Response response)
         {
-            var contentLength = Encoding.UTF8.GetByteCount(content);
-
-            var response = $@"HTTP/1.1 200 OK
-Content-Type: text/plain; charset=UTF-8
-Content-Length: {contentLength}
-
-{content}";
-
-            var responseBytes = Encoding.UTF8.GetBytes(response);
+            var responseBytes = Encoding.UTF8.GetBytes(response.ToString());
 
             stream.Write(responseBytes);
         }

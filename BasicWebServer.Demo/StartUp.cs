@@ -1,13 +1,15 @@
 ﻿namespace BasicWebServer.Demo 
 {
     using BasicWebServer.Server;
+    using BasicWebServer.Server.Responses;
     using System;
     internal class StartUp
     {
         static void Main(string[] args)
-        {
-            var server = new HttpServer("127.0.0.1", 9090);
-            server.Start();
-        }
+           => new HttpServer(routes => routes
+               .MapGet("/", new TextResponse("Hello from the server!"))
+               .MapGet("/Cats", new HtmlResponse("Hello from the cats!"))
+               .MapGet("/Redirect", new RedirectResponse("https://softuni.org/")))
+           .Start();
     }
 }
