@@ -54,6 +54,11 @@
 
                 var response = this.routingTable.MatchRequest(request);
 
+                if (response.PreRenderAction != null)
+                {
+                    response.PreRenderAction(request, response);
+                }
+
                 Writeresponse(networkStream, response);
 
                 connection.Close();

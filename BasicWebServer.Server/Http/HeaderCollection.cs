@@ -9,14 +9,17 @@ namespace BasicWebServer.Server.Http
         public HeaderCollection()
             => this.headers = new Dictionary<string, Header>();
 
+        public string this[string name]
+            => this.headers[name].Value;
+
         public int Count 
             => this.headers.Count;
 
         public void Add(string name, string value)
-        {
-            var header = new Header(name, value);
-            this.headers.Add(name, header);
-        }
+            => this.headers[name] = new Header(name, value);
+
+        public bool Contains(string name)
+            => this.headers.ContainsKey(name);
 
         public IEnumerator<Header> GetEnumerator()
             => this.headers.Values.GetEnumerator();
