@@ -33,7 +33,7 @@
         {
 
         }
-        public void Start()
+        public async Task Start()
         {
             this.listener.Start();
 
@@ -42,37 +42,40 @@
 
             while (true)
             {
-                var connection = listener.AcceptTcpClient();
+                var connection = await listener.AcceptTcpClientAsync();
 
-                var networkStream = connection.GetStream();
-
-                var requestText = this.ReadRequest(networkStream);
-
-                Console.WriteLine(requestText);
-
-                var request = Request.Parse(requestText);
-
-                var response = this.routingTable.MatchRequest(request);
-
-                if (response.PreRenderAction != null)
+                _ = Task.Run(async () =>
                 {
-                    response.PreRenderAction(request, response);
-                }
+                    var networkStream = connection.GetStream();
 
-                Writeresponse(networkStream, response);
+                    var requestText = await this.ReadRequest(networkStream);
 
-                connection.Close();
+                    Console.WriteLine(requestText);
+
+                    var request = Request.Parse(requestText);
+
+                    var response = this.routingTable.MatchRequest(request);
+
+                    if (response.PreRenderAction != null)
+                    {
+                        response.PreRenderAction(request, response);
+                    }
+
+                    await Writeresponse(networkStream, response);
+
+                    connection.Close();
+                });
             }
         }
 
-        private void Writeresponse(NetworkStream stream, Response response)
+        private async Task Writeresponse(NetworkStream stream, Response response)
         {
             var responseBytes = Encoding.UTF8.GetBytes(response.ToString());
 
-            stream.Write(responseBytes);
+            await stream.WriteAsync(responseBytes);
         }
 
-        private string ReadRequest(NetworkStream networkStream)
+        private async Task<string> ReadRequest(NetworkStream networkStream)
         {
             var bufferLength = 1024;
             var buffer = new byte[bufferLength];
@@ -82,7 +85,7 @@
 
             do
             {
-                var bytesRead = networkStream.Read(buffer, 0, bufferLength);
+                var bytesRead = await networkStream.ReadAsync(buffer, 0, bufferLength);
                 totalBytesRead += bytesRead;
 
                 if (totalBytesRead > 10 * 1024)

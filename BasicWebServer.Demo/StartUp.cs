@@ -11,8 +11,8 @@
            Age: <input type='number' name ='Age'/>
         <input type='submit' value ='Save' />
         </form>";
-        static void Main(string[] args)
-           => new HttpServer(routes => routes
+        static async Task Main(string[] args)
+           => await new HttpServer(routes => routes
                .MapGet("/", new TextResponse("Hello from the server!"))
                .MapGet("/Cats", new HtmlResponse("Hello from the cats!"))
                .MapGet("/Redirect", new RedirectResponse("https://softuni.org/"))
