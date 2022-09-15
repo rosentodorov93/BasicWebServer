@@ -4,6 +4,9 @@
     using BasicWebServer.Server.Http;
     using BasicWebServer.Server.Responses;
     using System;
+    using System.Text;
+    using System.Web;
+
     public class StartUp
     {
         private const string HtmlForm = @"<form action='/Html' method='POST'>
@@ -26,7 +29,8 @@
               .MapGet("/Html", new HtmlResponse(HtmlForm))
               .MapPost("/Html", new TextResponse("", StartUp.AddFormDataAction))
               .MapGet("/Content", new HtmlResponse(DownloadForm))
-              .MapPost("/Content", new TextFileResponse(FileName)));
+              .MapPost("/Content", new TextFileResponse(FileName))
+              .MapGet("/Cookies", new HtmlResponse("",AddCookieAction)));
 
             await server.Start();
         }
@@ -40,6 +44,41 @@
             {
                 response.Body += $"{key} - {value}";
                 response.Body += Environment.NewLine;
+            }
+        }
+        private static void AddCookieAction(Request request, Response response)
+        {
+            var requestHasCookies = request.Cookies.Any();
+            var bodyText = "";
+
+            if (requestHasCookies)
+            {
+                var cookieBuilder = new StringBuilder();
+                cookieBuilder.AppendLine("<h1>Cookies</h1>");
+
+                cookieBuilder.Append("<table border='1'><tr><th>Name</th><th>Value</th></tr>");
+
+                foreach (var cookie in request.Cookies)
+                {
+                    cookieBuilder.Append("<tr>");
+                    cookieBuilder.Append($"<td>{HttpUtility.HtmlEncode(cookie.Name)}</td>");
+                    cookieBuilder.Append($"<td>{HttpUtility.HtmlEncode(cookie.Value)}</td>");
+                    cookieBuilder.Append("</tr>");
+                }
+                cookieBuilder.Append("</table>");
+
+                bodyText = cookieBuilder.ToString();
+            }
+            else
+            {
+                bodyText = "<h1>Cookies Set!</h1>";
+            }
+            response.Body = bodyText;
+
+            if (!requestHasCookies)
+            {
+                response.Cookies.Add("My-Cookie", "My-Value");
+                response.Cookies.Add("My-Second-Cookie", "My-Second-Value");
             }
         }
         private static async Task<string> DownloadWebSiteContent(string url)

@@ -14,6 +14,7 @@ namespace BasicWebServer.Server.Http
         public StatusCode StatusCode { get; init; }
 
         public HeaderCollection Headers { get; } = new HeaderCollection();
+        public CookieCollection Cookies { get; } = new CookieCollection();
 
         public string Body { get; set; }
 
@@ -29,6 +30,10 @@ namespace BasicWebServer.Server.Http
                 responseBuilder.AppendLine(header.ToString());
             }
 
+            foreach (var cookie in this.Cookies)
+            {
+                responseBuilder.AppendLine($"{Header.SetCookie}: {cookie.ToString()}");
+            }
             responseBuilder.AppendLine();
 
             if (!string.IsNullOrEmpty(this.Body))
