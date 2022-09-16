@@ -61,13 +61,14 @@
                         response.PreRenderAction(request, response);
                     }
 
+                    AddSession(request, response);
+
                     await Writeresponse(networkStream, response);
 
                     connection.Close();
                 });
             }
         }
-
         private async Task Writeresponse(NetworkStream stream, Response response)
         {
             var responseBytes = Encoding.UTF8.GetBytes(response.ToString());
@@ -98,6 +99,16 @@
             while (networkStream.DataAvailable);
 
             return requestBuilder.ToString();
+        }
+        private static void AddSession(Request request, Response response)
+        {
+            var sessionExists = request.Session.ContainsKey(Session.SessionCurrentDateKey);
+
+            if (!sessionExists)
+            {
+                request.Session[Session.SessionCurrentDateKey] = DateTime.Now.ToString();
+                response.Cookies.Add(Session.SessionCookieName, request.Session.Id);
+            }
         }
     }
 }

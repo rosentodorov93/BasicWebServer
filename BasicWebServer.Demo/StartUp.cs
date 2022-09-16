@@ -30,11 +30,11 @@
               .MapPost("/Html", new TextResponse("", StartUp.AddFormDataAction))
               .MapGet("/Content", new HtmlResponse(DownloadForm))
               .MapPost("/Content", new TextFileResponse(FileName))
-              .MapGet("/Cookies", new HtmlResponse("",AddCookieAction)));
+              .MapGet("/Cookies", new HtmlResponse("",AddCookieAction))
+              .MapGet("/Session", new TextResponse("", DisplaySessionInfoAction)));
 
             await server.Start();
         }
-           
 
         private static void AddFormDataAction(Request request, Response response)
         {
@@ -48,7 +48,7 @@
         }
         private static void AddCookieAction(Request request, Response response)
         {
-            var requestHasCookies = request.Cookies.Any();
+            var requestHasCookies = request.Cookies.Any(c => c.Name != Session.SessionCookieName);
             var bodyText = "";
 
             if (requestHasCookies)
@@ -80,6 +80,25 @@
                 response.Cookies.Add("My-Cookie", "My-Value");
                 response.Cookies.Add("My-Second-Cookie", "My-Second-Value");
             }
+        }
+        private static void DisplaySessionInfoAction(Request request, Response response)
+        {
+            var sessionExists = request.Session.ContainsKey(Session.SessionCurrentDateKey);
+
+            var bodyText = "";
+
+            if (sessionExists)
+            {
+                var currentDate = request.Session[Session.SessionCurrentDateKey];
+                bodyText = $"Stored date: {currentDate}!";
+            }
+            else
+            {
+                bodyText = "Current date stored!";
+            }
+
+            response.Body = "";
+            response.Body = bodyText;
         }
         private static async Task<string> DownloadWebSiteContent(string url)
         {
