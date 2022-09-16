@@ -17,25 +17,58 @@
         private const string DownloadForm = @"<form action='/Content' method='POST'>
    <input type='submit' value ='Download Sites Content' /> 
 </form>";
+        private const string LoginForm = @"<form action='/Login' method='POST'>
+   Username: <input type='text' name='Username'/>
+   Password: <input type='text' name='Password'/>
+   <input type='submit' value ='Log In' /> 
+</form>";
         private const string FileName = "content.txt";
+
+        private const string Username = "user";
+        private const string Password = "user123";
         static async Task Main(string[] args)
         {
-            await DownloadSitesAsTextFile(FileName, new string[] { "https://judge.softuni.org/", "https://softuni.org/" });
+            await DownloadSitesAsTextFile(FileName, new string[] { "https://judge.softuni.org/", "https://softuni.bg/" });
 
             var server = new HttpServer(routes => routes
               .MapGet("/", new TextResponse("Hello from the server!"))
               .MapGet("/Cats", new HtmlResponse("Hello from the cats!"))
               .MapGet("/Redirect", new RedirectResponse("https://softuni.org/"))
               .MapGet("/Html", new HtmlResponse(HtmlForm))
-              .MapPost("/Html", new TextResponse("", StartUp.AddFormDataAction))
+              .MapPost("/Html", new TextResponse("", AddFormDataAction))
               .MapGet("/Content", new HtmlResponse(DownloadForm))
               .MapPost("/Content", new TextFileResponse(FileName))
               .MapGet("/Cookies", new HtmlResponse("",AddCookieAction))
-              .MapGet("/Session", new TextResponse("", DisplaySessionInfoAction)));
+              .MapGet("/Session", new TextResponse("", DisplaySessionInfoAction))
+              .MapGet("/Login", new HtmlResponse(LoginForm))
+              .MapPost("/Login", new HtmlResponse("", LoginAction)));
 
             await server.Start();
         }
+        private static void LoginAction(Request request, Response response)
+        {
+            request.Session.Clear();
 
+            var bodyText = "";
+
+            var usernameMatches = request.Form["Username"] == Username;
+            var passwordMatches = request.Form["Password"] == Password;
+
+            if (usernameMatches && passwordMatches)
+            {
+                request.Session[Session.SessionUserKey] = "MyUserId";
+                response.Cookies.Add(Session.SessionCookieName, request.Session.Id);
+
+                bodyText = "<h3>Logged in successfully!</h3>";
+            }
+            else
+            {
+                bodyText = LoginForm;
+            }
+
+            response.Body = "";
+            response.Body = bodyText;
+        }
         private static void AddFormDataAction(Request request, Response response)
         {
             response.Body = "";
