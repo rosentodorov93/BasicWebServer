@@ -11,7 +11,7 @@ namespace BasicWebServer.Server.Routing
 {
     public class RoutingTable : IRoutingTable
     {
-        private readonly Dictionary<Method, Dictionary<string, Response>> routes;
+        private readonly Dictionary<Method, Dictionary<string, Func<Request, Response>>> routes;
 
         public RoutingTable()
             => this.routes = new()
@@ -21,33 +21,22 @@ namespace BasicWebServer.Server.Routing
                 [Method.Put] = new(),
                 [Method.Delete] = new()
             };
-        public IRoutingTable Map(Method method, string url, Response response)
-            => method switch
-            {
-                Method.Get => this.MapGet(url, response),
-                Method.Post => this.MapPost(url, response),
-                _ => throw new InvalidOperationException($"Method {method} is not supported")
-            };
-
-        public IRoutingTable MapGet(string url, Response response)
+        public IRoutingTable Map(Method method, string url, Func<Request, Response> responseFunction)
         {
             Guard.AgainstNull(url, nameof(url));
-            Guard.AgainstNull(response, nameof(response));
+            Guard.AgainstNull(responseFunction, nameof(responseFunction));
 
-            this.routes[Method.Get][url] = response;
+            this.routes[method][url] = responseFunction;
 
-            return this;
+            return this;    
+
         }
 
-        public IRoutingTable MapPost(string url, Response response)
-        {
-            Guard.AgainstNull(url, nameof(url));
-            Guard.AgainstNull(response, nameof(response));
+        public IRoutingTable MapGet(string url, Func<Request, Response> responseFunction)
+            => Map(Method.Get, url, responseFunction);
 
-            this.routes[Method.Post][url] = response;
-
-            return this;
-        }
+        public IRoutingTable MapPost(string url, Func<Request, Response> responseFunction)
+            => Map(Method.Post, url, responseFunction);
 
         public Response MatchRequest(Request request)
         {
@@ -60,7 +49,9 @@ namespace BasicWebServer.Server.Routing
                 return new NotFoundResponse();
             }
 
-            return this.routes[requestMethod][requestUrl];
+            var responseFunction =  this.routes[requestMethod][requestUrl];
+
+            return responseFunction(request);
         }
     }
 }

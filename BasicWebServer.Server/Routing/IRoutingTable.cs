@@ -9,10 +9,10 @@ namespace BasicWebServer.Server.Routing
 {
     public interface IRoutingTable
     {
-        IRoutingTable Map(Method method, string url, Response response);
+        IRoutingTable Map(Method method, string url, Func<Request, Response> responseFunction);
 
-        IRoutingTable MapGet(string url, Response response);
+        IRoutingTable MapGet(string url, Func<Request, Response> responseFunction);
 
-        IRoutingTable MapPost(string url, Response response);
+        IRoutingTable MapPost(string url, Func<Request, Response> responseFunction);
     }
 }
