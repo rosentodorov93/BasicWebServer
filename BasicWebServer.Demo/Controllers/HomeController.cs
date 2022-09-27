@@ -48,7 +48,7 @@ namespace BasicWebServer.Demo.Controllers
         {
             var resultHtml = "";
             var cookies = new CookieCollection();
-            if (this.Request.Cookies.Any(c => c.Name != Session.SessionCookieName))
+            if (this.Request.Cookies.Any(c => c.Name != BasicWebServer.Server.Http.Session.SessionCookieName))
             {
                 var cookieBuilder = new StringBuilder();
                 cookieBuilder.AppendLine("<h1>Cookies</h1>");
@@ -75,6 +75,23 @@ namespace BasicWebServer.Demo.Controllers
 
             return Html(resultHtml,cookies);
 
+        }
+        public Response Session()
+        {
+            var currentDateKey = "CurrentDate";
+            var sessionExists = this.Request.Session.ContainsKey(currentDateKey);
+            var textResult = "";
+            if (sessionExists)
+            {
+                var currentDate = this.Request.Session[currentDateKey];
+                textResult = $"Stored date: {currentDate}!";
+            }
+            else
+            {
+                textResult = "Current date stored!";
+            }
+
+            return Text(textResult);
         }
         private static async Task<string> DownloadWebSiteContent(string url)
         {

@@ -40,8 +40,6 @@ namespace BasicWebServer.Server.Http
             };
         }
 
-     
-
         private static Method ParseMethod(string method)
         {
             try
