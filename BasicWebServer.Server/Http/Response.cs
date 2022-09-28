@@ -10,15 +10,10 @@ namespace BasicWebServer.Server.Http
             this.Headers.Add(Header.Server,"My Web Server");
             this.Headers.Add(Header.Date,$"{DateTime.UtcNow:r}");
         }
-
         public StatusCode StatusCode { get; init; }
-
         public HeaderCollection Headers { get; } = new HeaderCollection();
         public CookieCollection Cookies { get; } = new CookieCollection();
-
         public string Body { get; set; }
-
-        public Action<Request,Response> PreRenderAction { get; protected set; }
         public override string ToString()
         {
             var responseBuilder = new StringBuilder();
