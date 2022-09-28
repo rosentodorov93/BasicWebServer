@@ -25,7 +25,7 @@ namespace BasicWebServer.Demo.Controllers
 
         public Response Index() => Text("Hello from the server!");
         public Response Redirect() => Redirect("https://softuni.bg");
-        public Response Html() => Html(HtmlForm);
+        public Response Html() => View();
         public Response HtmlFormPost()
         {
             var formBuilder = new StringBuilder();
@@ -37,7 +37,7 @@ namespace BasicWebServer.Demo.Controllers
 
             return Text(formBuilder.ToString());
         }
-        public Response Content() => Html(DownloadForm);
+        public Response Content() => View();
         public Response DownloadContent()
         {
             DownloadSitesAsTextFile(FileName, new string[] { "https://judge.softuni.org/", "https://softuni.bg/" }).Wait();
