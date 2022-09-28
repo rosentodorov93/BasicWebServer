@@ -1,4 +1,5 @@
-﻿using BasicWebServer.Server.Controllers;
+﻿using BasicWebServer.Demo.Models;
+using BasicWebServer.Server.Controllers;
 using BasicWebServer.Server.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,14 +9,6 @@ namespace BasicWebServer.Demo.Controllers
 {
     public class HomeController : Controller
     {
-        private const string HtmlForm = @"<form action='/Html' method='POST'>
-           Name: <input type='text' name='Name'/>
-           Age: <input type='number' name ='Age'/>
-        <input type='submit' value ='Save' />
-        </form>";
-        private const string DownloadForm = @"<form action='/Content' method='POST'>
-   <input type='submit' value ='Download Sites Content' /> 
-</form>";
         private const string FileName = "content.txt";
 
         public HomeController(Request request) 
@@ -28,14 +21,16 @@ namespace BasicWebServer.Demo.Controllers
         public Response Html() => View();
         public Response HtmlFormPost()
         {
-            var formBuilder = new StringBuilder();
+            var name = this.Request.Form["Name"];
+            var age = this.Request.Form["Age"];
 
-            foreach (var (key, value) in this.Request.Form)
+            var model = new FormViewModel()
             {
-                formBuilder.AppendLine($"{key} - {value}");
-            }
+                Name = name,
+                Age = int.Parse(age)
+            };
 
-            return Text(formBuilder.ToString());
+            return View(model);
         }
         public Response Content() => View();
         public Response DownloadContent()
