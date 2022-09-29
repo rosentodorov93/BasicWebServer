@@ -1,5 +1,6 @@
 ﻿namespace BasicWebServer.Server
 {
+    using BasicWebServer.Server.Common;
     using BasicWebServer.Server.Http;
     using BasicWebServer.Server.Routing;
     using System.Net;
@@ -12,6 +13,7 @@
         private readonly TcpListener listener;
 
         private readonly RoutingTable routingTable;
+        public readonly IServiceCollection ServiceCollection;
 
 
         public HttpServer(string ipAddress, int port, Action<IRoutingTable> routingTableConfiguraion)
@@ -22,6 +24,7 @@
             this.listener = new TcpListener(this.ipAddress,port);
 
             routingTableConfiguraion(this.routingTable = new RoutingTable());
+            ServiceCollection = new ServiceCollection();
         }
         public HttpServer(int port, Action<IRoutingTable> routingTable)
             :this("127.0.0.1",port,routingTable)
@@ -52,7 +55,7 @@
 
                     Console.WriteLine(requestText);
 
-                    var request = Request.Parse(requestText);
+                    var request = Request.Parse(requestText, ServiceCollection);
 
                     var response = this.routingTable.MatchRequest(request);
 

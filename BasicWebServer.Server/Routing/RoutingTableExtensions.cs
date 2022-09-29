@@ -1,12 +1,13 @@
-﻿using BasicWebServer.Server.Http;
-using BasicWebServer.Server.Routing;
+﻿using BasicWebServer.Server.Controllers;
+using BasicWebServer.Server.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BasicWebServer.Server.Controllers
+namespace BasicWebServer.Server.Routing
 {
     public static class RoutingTableExtensions
     {
@@ -26,5 +27,15 @@ namespace BasicWebServer.Server.Controllers
 
         private static TController CreateController<TController>(Request request)
             => (TController)Activator.CreateInstance(typeof(TController), new[] { request });
+        private Controller CreateController(Type controllerType, Request request)
+        {
+            var controller = (Controller)Request.ServiceCollection.CreateInstance(controllerType);
+
+            controllerType
+                .GetProperty("Request", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(controller, request);
+
+            return controller;
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using BasicWebServer.Server.Common;
+using System.Web;
 
 namespace BasicWebServer.Server.Http
 {
@@ -12,8 +13,10 @@ namespace BasicWebServer.Server.Http
         public string Body { get; private set; }
         public Session Session { get; private set; }
         public IReadOnlyDictionary<string,string> Form { get; private set; }
-        public static Request Parse(string request)
+        public static IServiceCollection ServiceCollection { get; private set; }
+        public static Request Parse(string request, IServiceCollection serviceCollection)
         {
+            ServiceCollection = serviceCollection;
             var lines = request.Split("\r\n");
 
             var startLine = lines[0].Split();
