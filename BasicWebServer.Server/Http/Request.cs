@@ -13,6 +13,7 @@ namespace BasicWebServer.Server.Http
         public string Body { get; private set; }
         public Session Session { get; private set; }
         public IReadOnlyDictionary<string,string> Form { get; private set; }
+        public IReadOnlyDictionary<string,string> Query { get; private set; }
         public static IServiceCollection ServiceCollection { get; private set; }
         public static Request Parse(string request, IServiceCollection serviceCollection)
         {
@@ -22,7 +23,7 @@ namespace BasicWebServer.Server.Http
             var startLine = lines[0].Split();
 
             var method = ParseMethod(startLine[0]);
-            var url = startLine[1];
+            (string url, Dictionary<string, string> query) = ParseUrl(startLine[1]);
             var headers = ParseHeaders(lines.Skip(1));
             var cookies = ParseCookies(headers);
             var session = GetSession(cookies);
@@ -39,8 +40,37 @@ namespace BasicWebServer.Server.Http
                 Cookies = cookies,
                 Session = session,
                 Body = body,
-                Form = form
+                Form = form,
+                Query = query
             };
+        }
+
+        private static (string url, Dictionary<string, string> query) ParseUrl(string fullUrl)
+        {
+            var url = string.Empty;
+            var query = new Dictionary<string, string>();
+            var urlParts = fullUrl.Split("?",2);
+
+            if (urlParts.Length == 1)
+            {
+                url = urlParts[0];
+            }
+            else
+            {
+                url = urlParts[0];
+                var queryPairs = urlParts[1].Split("&");
+
+                foreach (var pair in queryPairs)
+                {
+                    var queryParams = pair.Split("=");
+                    if (queryParams.Length == 2)
+                    {
+                        query.Add(queryParams[0].Trim(), queryParams[1].Trim());
+                    }
+                }
+            }
+
+            return (url, query);
         }
 
         private static Method ParseMethod(string method)

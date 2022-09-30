@@ -27,7 +27,7 @@ namespace BasicWebServer.Server.Routing
 
         private static TController CreateController<TController>(Request request)
             => (TController)Activator.CreateInstance(typeof(TController), new[] { request });
-        private Controller CreateController(Type controllerType, Request request)
+        private static Controller CreateController(Type controllerType, Request request)
         {
             var controller = (Controller)Request.ServiceCollection.CreateInstance(controllerType);
 
