@@ -51,13 +51,8 @@ namespace BasicWebServer.Server.Http
             var query = new Dictionary<string, string>();
             var urlParts = fullUrl.Split("?",2);
 
-            if (urlParts.Length == 1)
+            if (urlParts.Length > 1)
             {
-                url = urlParts[0];
-            }
-            else
-            {
-                url = urlParts[0];
                 var queryPairs = urlParts[1].Split("&");
 
                 foreach (var pair in queryPairs)
@@ -69,6 +64,8 @@ namespace BasicWebServer.Server.Http
                     }
                 }
             }
+
+            url = urlParts[0];
 
             return (url, query);
         }

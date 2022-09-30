@@ -1,4 +1,5 @@
-﻿using BasicWebServer.Server.Controllers;
+﻿using BasicWebServer.Server.Attributes;
+using BasicWebServer.Server.Controllers;
 using BasicWebServer.Server.Http;
 using System;
 using System.Collections.Generic;
@@ -8,22 +9,17 @@ using System.Threading.Tasks;
 
 namespace BasicWebServer.Demo.Controllers
 {
-    internal class UsersController : Controller
+    public class UserController : Controller
     {
-        private const string LoginForm = @"<form action='/Login' method='POST'>
-   Username: <input type='text' name='Username'/>
-   Password: <input type='text' name='Password'/>
-   <input type='submit' value ='Log In' /> 
-</form>";
-
         private const string Username = "user";
         private const string Password = "user123";
-        public UsersController(Request request)
+        public UserController(Request request)
             : base(request)
         {
         }
 
-        public Response Login() => View();  
+        public Response Login() => View();
+        [HttpPost]
         public Response LoginUser()
         {
             this.Request.Session.Clear();

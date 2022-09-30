@@ -25,7 +25,7 @@
     <Content Update="Views\Home\Html.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Update="Views\Users\Login.cshtml">
+    <Content Update="Views\User\Login.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
