@@ -165,11 +165,11 @@ namespace BasicWebServer.Server.Routing
             const string defaultControllerName = "Home";
             const string defaultActionName = "Index";
 
-            if (actionName == defaultActionName)
+            if (controllerName == defaultControllerName)
             {
-                routingTable.Map(httpMethod, $"/{controllerName}", responseFunction);
+                routingTable.Map(httpMethod, $"/{actionName}", responseFunction);
 
-                if (controllerName == defaultControllerName)
+                if (actionName == defaultActionName)
                 {
                     routingTable.Map(httpMethod, $"/", responseFunction);
                 }

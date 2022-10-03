@@ -2,11 +2,6 @@
 using BasicWebServer.Server.Attributes;
 using BasicWebServer.Server.Controllers;
 using BasicWebServer.Server.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BasicWebServer.Demo.Controllers
 {
@@ -24,8 +19,6 @@ namespace BasicWebServer.Demo.Controllers
         public Response LoginUser()
         {
             this.Request.Session.Clear();
-
-            var textResult = "";
 
             var username = this.Request.Form["Username"];
             var password = this.Request.Form["Password"];
@@ -45,7 +38,7 @@ namespace BasicWebServer.Demo.Controllers
                 return Html("<h3>Logged in successfully!</h3>");
             }
 
-            return Redirect("/Login");
+            return Redirect("/User/Login");
         }
         public Response Logout()
         {

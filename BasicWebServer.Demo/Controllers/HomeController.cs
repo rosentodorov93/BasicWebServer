@@ -19,6 +19,17 @@ namespace BasicWebServer.Demo.Controllers
 
         public Response Index() => Text("Hello from the server!");
         public Response Student(string name, int age) => Text($"Hello I am {name} and i am {age} years old!");
+        public Response Test()
+        {
+            var model = new List<FormViewModel>
+            {
+                new(){Name = "Rosko", Age = 29},
+                new(){Name = "Pencho", Age = 29},
+                new(){Name = "Plami", Age = 27}
+            };
+
+            return View(model);
+        }
         public Response Redirect() => Redirect("https://softuni.bg");
         public Response Html() => View();
 
@@ -37,6 +48,8 @@ namespace BasicWebServer.Demo.Controllers
             return View(model);
         }
         public Response Content() => View();
+
+        [HttpPost]
         public Response DownloadContent()
         {
             DownloadSitesAsTextFile(FileName, new string[] { "https://judge.softuni.org/", "https://softuni.bg/" }).Wait();

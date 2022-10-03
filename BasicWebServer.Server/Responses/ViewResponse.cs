@@ -1,5 +1,6 @@
 ﻿using BasicWebServer.Server.Http;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,11 +23,100 @@ namespace BasicWebServer.Server.Responses
 
             var viewContent = File.ReadAllText(viewPath);
 
+            var (layoutPath, layoutExists) = FindLayout();
+
+            if (layoutExists)
+            {
+                var layoutContent = File.ReadAllText(layoutPath);
+                viewContent = layoutContent.Replace("{{RenderBody}}", viewContent);
+            }
+
             if (model != null)
             {
-                viewContent = PopulateModel(viewContent, model);
+                if (model is IEnumerable)
+                {
+                    viewContent = PopulateEnumerableModel(viewContent, model);
+                }
+                else
+                {
+                    viewContent = PopulateModel(viewContent, model);
+                }
             }
             this.Body = viewContent;
+        }
+
+        private (string, bool) FindLayout()
+        {
+            string layoutPath = null;
+            bool layoutExists = false;
+
+            layoutPath = Path.GetFullPath("./Views/Layout.cshtml");
+
+            if (File.Exists(layoutPath))
+            {
+                layoutExists = true;
+            }
+            else
+            {
+                layoutPath = Path.GetFullPath("./Views/Shared/_Layout.cshtml");
+
+                if (File.Exists(layoutPath))
+                {
+                    layoutExists = true;
+                }
+            }
+
+            return (layoutPath, layoutExists);
+        }
+
+        private string PopulateEnumerableModel(string viewContent, object model)
+        {
+            var result = new StringBuilder();
+
+            var viewContentLines = viewContent.Split(Environment.NewLine).Select(l => l.Trim());
+
+            var inLoop = false;
+            StringBuilder loopContent = null;
+
+            foreach (var line in viewContentLines)
+            {
+                if (line.StartsWith("{{foreach}}"))
+                {
+                    inLoop = true;
+                    continue;
+                }
+
+                if (inLoop)
+                {
+                    if (line.StartsWith("{"))
+                    {
+                        loopContent = new StringBuilder();
+                    }
+                    else if (line.StartsWith("}"))
+                    {
+                        var loopTemplate = loopContent.ToString();
+
+                        foreach (var item in (IEnumerable)model)
+                        {
+                            var loopResult = PopulateModel(loopTemplate, item);
+
+                            result.AppendLine(loopResult);
+                        }
+
+                        inLoop = false;
+                    }
+                    else
+                    {
+                        loopContent.AppendLine(line);
+                    }
+
+                    continue;
+                }
+
+                result.AppendLine(line);
+            }
+
+            return result.ToString();
         }
 
         private string PopulateModel(string viewContent, object model)
