@@ -37,7 +37,7 @@ namespace BasicWebServer.Server.Routing
                 string actionName = controllerAction.Name;
                 string path = $"/{controllerName}/{actionName}";
 
-                var respnseFunction = GetResponseFunction(controllerAction);
+                var responseFunction = GetResponseFunction(controllerAction);
 
                 Method httpMethod = Method.Get;
                 var actionAttribute = controllerAction.GetCustomAttribute<HttpMethodAttribute>();
@@ -47,11 +47,14 @@ namespace BasicWebServer.Server.Routing
                     httpMethod = actionAttribute.HttpMethod;
                 }
 
-                routingTable.Map(httpMethod, path, respnseFunction);
+                routingTable.Map(httpMethod, path, responseFunction);
+
+                MapDefaultRoutes(routingTable, httpMethod, controllerName, actionName, responseFunction);
             }
 
             return routingTable;
         }
+
 
         private static Func<Request, Response> GetResponseFunction(MethodInfo controllerAction)
         {
@@ -133,5 +136,20 @@ namespace BasicWebServer.Server.Routing
         private static string GetValue(this Request request, string? name)
             => request.Query.GetValueOrDefault(name) ??
                 request.Form.GetValueOrDefault(name);
+        private static void MapDefaultRoutes(IRoutingTable routingTable, Method httpMethod, string controllerName, string actionName, Func<Request, Response> responseFunction)
+        {
+            const string defaultControllerName = "Home";
+            const string defaultActionName = "Index";
+
+            if (actionName == defaultActionName)
+            {
+                routingTable.Map(httpMethod, $"/{controllerName}", responseFunction);
+
+                if (controllerName == defaultControllerName)
+                {
+                    routingTable.Map(httpMethod, $"/", responseFunction);
+                }
+            }
+        }
     }
 }
