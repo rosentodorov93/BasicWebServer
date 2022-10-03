@@ -1,4 +1,5 @@
-﻿using BasicWebServer.Server.Attributes;
+﻿using BasicWebServer.Demo.Services;
+using BasicWebServer.Server.Attributes;
 using BasicWebServer.Server.Controllers;
 using BasicWebServer.Server.Http;
 using System;
@@ -11,11 +12,11 @@ namespace BasicWebServer.Demo.Controllers
 {
     public class UserController : Controller
     {
-        private const string Username = "user";
-        private const string Password = "user123";
-        public UserController(Request request)
+        private readonly UserServices userServices;
+        public UserController(Request request, UserServices _userServices)
             : base(request)
         {
+            userServices = _userServices;
         }
 
         public Response Login() => View();
@@ -26,10 +27,10 @@ namespace BasicWebServer.Demo.Controllers
 
             var textResult = "";
 
-            var usernameMatches = this.Request.Form["Username"] == Username;
-            var passwordMatches = this.Request.Form["Password"] == Password;
+            var username = this.Request.Form["Username"];
+            var password = this.Request.Form["Password"];
 
-            if (usernameMatches && passwordMatches)
+            if (userServices.IsLoginCorrect(username,password))
             {
                 if (!this.Request.Session.ContainsKey(Session.SessionUserKey))
                 {
