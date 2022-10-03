@@ -60,12 +60,36 @@ namespace BasicWebServer.Server.Routing
         {
             return request =>
             {
+                if (!UserIsAuthorized(controllerAction, request.Session))
+                {
+                    return new Response(StatusCode.Unauthorized);
+                }
+
                 var controllerInstance = CreateController(controllerAction.DeclaringType, request);
 
                 var parameterValues = GetParameterValues(controllerAction, request);
 
                 return (Response)controllerAction.Invoke(controllerInstance, parameterValues);
             };
+        }
+
+        private static bool UserIsAuthorized(MethodInfo controllerAction, Session session)
+        {
+            var isAuthorzationReqiuired = controllerAction.DeclaringType.GetCustomAttribute<AuthorizeAttribute>()
+                ?? controllerAction.GetCustomAttribute<AuthorizeAttribute>();
+
+            if (isAuthorzationReqiuired != null)
+            {
+                var userIsAuthorized = session.ContainsKey(Session.SessionUserKey)
+                    && session[Session.SessionUserKey] != null;
+
+                if (!userIsAuthorized)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static object[] GetParameterValues(MethodInfo controllerAction, Request reqest)

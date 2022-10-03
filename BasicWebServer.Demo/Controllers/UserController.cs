@@ -33,7 +33,7 @@ namespace BasicWebServer.Demo.Controllers
             {
                 if (!this.Request.Session.ContainsKey(Session.SessionUserKey))
                 {
-                    this.Request.Session[Session.SessionUserKey] = "MyUserId";
+                    SignIn(Guid.NewGuid().ToString());
 
                     var cookies = new CookieCollection();
                     cookies.Add(Session.SessionCookieName, this.Request.Session.Id);
@@ -48,18 +48,14 @@ namespace BasicWebServer.Demo.Controllers
         }
         public Response Logout()
         {
-            this.Request.Session.Clear();
+            SignOut();
 
             return Html("<h3>Logged out successfully!</h3>");
         }
+        [Authorize]
         public Response GetUserData()
         {
-            if (this.Request.Session.ContainsKey(Session.SessionUserKey))
-            {
-                return Html($"<h3>Currently logged in user" + $" is with username - {Username}</h3>");
-            }
-
-            return Redirect("/Login");
+            return Html($"<h3>Currently logged in user" + $" is with Id - {User.Id}</h3>");
         }
     }
 }
