@@ -8,9 +8,12 @@
     {     
         static async Task Main(string[] args)
         {
-            var server = new HttpServer(routes => routes.MapControllers());
+            var server = new HttpServer(routes => routes
+            .MapControllers()
+            .MapStaticFiles());
 
             server.ServiceCollection.Add<UserServices>();
+
 
             await server.Start();
         }        

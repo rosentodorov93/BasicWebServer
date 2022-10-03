@@ -14,6 +14,7 @@ namespace BasicWebServer.Server.Http
         public HeaderCollection Headers { get; } = new HeaderCollection();
         public CookieCollection Cookies { get; } = new CookieCollection();
         public string Body { get; set; }
+        public byte[] FileContent { get; set; }
         public override string ToString()
         {
             var responseBuilder = new StringBuilder();

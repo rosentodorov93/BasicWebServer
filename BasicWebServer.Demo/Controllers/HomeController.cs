@@ -50,12 +50,8 @@ namespace BasicWebServer.Demo.Controllers
         public Response Content() => View();
 
         [HttpPost]
-        public Response DownloadContent()
-        {
-            DownloadSitesAsTextFile(FileName, new string[] { "https://judge.softuni.org/", "https://softuni.bg/" }).Wait();
-
-            return File(FileName);
-        }
+        public Response DownloadContent() => File(FileName);
+      
         public Response Cookie()
         {
             var resultHtml = "";
@@ -104,32 +100,6 @@ namespace BasicWebServer.Demo.Controllers
             }
 
             return Text(textResult);
-        }
-        private static async Task<string> DownloadWebSiteContent(string url)
-        {
-            var client = new HttpClient();
-
-            using (client)
-            {
-                var response = await client.GetAsync(url);
-                var content = await response.Content.ReadAsStringAsync();
-                return content.Substring(0, 2000);
-            }
-        }
-        private static async Task DownloadSitesAsTextFile(string fileName, string[] urls)
-        {
-            var downloads = new List<Task<string>>();
-
-            foreach (var url in urls)
-            {
-                downloads.Add(DownloadWebSiteContent(url));
-            }
-
-            var responses = await Task.WhenAll(downloads);
-
-            var joinedResponses = string.Join(Environment.NewLine + new String('-', 50), responses);
-
-            await System.IO.File.WriteAllTextAsync(fileName, joinedResponses);
         }
     }
 }

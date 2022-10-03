@@ -54,8 +54,6 @@ namespace BasicWebServer.Server.Routing
 
             return routingTable;
         }
-
-
         private static Func<Request, Response> GetResponseFunction(MethodInfo controllerAction)
         {
             return request =>
@@ -174,6 +172,43 @@ namespace BasicWebServer.Server.Routing
                     routingTable.Map(httpMethod, $"/", responseFunction);
                 }
             }
+        }
+        public static IRoutingTable MapStaticFiles(this IRoutingTable routingTable, string folder = "wwwroot")
+        {
+            var currentDirectory = Directory.GetCurrentDirectory();
+            var staticFilesFolder = Path.Combine(currentDirectory, folder);
+
+            if (!Directory.Exists(staticFilesFolder))
+            {
+                return routingTable;
+            }
+
+            var staticFiles = Directory.GetFiles(
+                staticFilesFolder,
+                "*.*",
+                SearchOption.AllDirectories);
+
+            foreach (var file in staticFiles)
+            {
+                var relativePath = Path.GetRelativePath(staticFilesFolder, file);
+
+                var urlPath = "/" + relativePath.Replace("\\", "/");
+
+                routingTable.Map(Method.Get, urlPath, request =>
+                {
+                    var content = File.ReadAllBytes(file);
+                    var fileExtension = Path.GetExtension(file).Trim('.');
+                    var fileName = Path.GetFileName(file);
+                    var contentType = ContentType.GetByFileExtension(fileExtension);
+
+                    return new Response(StatusCode.OK)
+                    {
+                        FileContent = content
+                    };
+                });
+            }
+
+            return routingTable;
         }
     }
 }
